@@ -1,4 +1,4 @@
-import notesAPI from "../../styles/apps.js";
+mport notesAPI from "../../styles/apps.js";
 import Utils from "../utils.js";
 
 
@@ -12,8 +12,8 @@ const noteLoadingElement =
 
 const noteArchivedListContainerElement =
   document.querySelector("#ArchivedList");
-const notearchivedListElement =
-  noteArchivedListContainerElement.querySelector("archived-list");
+// const notearchivedListElement =
+//   noteArchivedListContainerElement.querySelector("archived-list");
 
 //handler buat tambah notes
 
@@ -61,13 +61,13 @@ export const showNote = (query) => {
     });
 };
 
-export const showNoteArchived = () => {
+export const showNoteArchived= () => {
   showLoading();
   notesAPI
     .getArchived()
     .then((results) => {
       displayNotearchivedResult(results);
-      showNoteList();
+      showNotearchivedList();
     })
     .catch((error) => {
       console.error(
@@ -128,9 +128,16 @@ const onUnarchiveNoteHandler = (event) => {
 };
 
 const displayResults = (notes) => {
-  
 
+//   document.querySelectorAll('.arc-btn').forEach((button) => {
+//     button.addEventListener('click', () => {
+//         const noteId = button.getAttribute('id');
+//         notesAPI.archiveNote(noteId);
+//   })
+// })
   notes.map((note) => {
+    
+    
     noteListElements.innerHTML += `
      <div class ="card">
       <div id=${note.id} class ="column-list">
@@ -138,13 +145,15 @@ const displayResults = (notes) => {
         <p>${note.body}</p>
         <p>${note.createdAt}</p>
         <p>${note.archived}</p>
-        <button id = deleteButton class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
-        <button class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Arsipkan</button>
+        <button class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
+        <button  id ="${note.id}"class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Arsipkan</button>
       </div>
       </div>
     `
     })
   }
+
+ 
   // const noteListItemElements = notes.map((note) => {
   //   const ListItemElements = document.createElement("notes-item");
   //   ListItemElements.note = note;
@@ -159,20 +168,38 @@ const displayResults = (notes) => {
 //};
 
 const displayNotearchivedResult = (notearchived) => {
-  const archivedItemElements = notearchived.map((notearchived) => {
-    const archivedItemElement = document.createElement("archive-items");
-    archivedItemElement.note = notearchived;
-    archivedItemElement.addEventListener(
-      "unarchiveNote",
-      onUnarchiveNoteHandler,
-    );
 
-    return archivedItemElements;
-  });
+  notearchived.map((note)=>{
+    noteArchivedListContainerElement.innerHTML += `
+     <div class ="card">
+      <div id=${note.id} class ="column-list">
+        <h2>${note.title}</h2>
+        <p>${note.body}</p>
+        <p>${note.createdAt}</p>
+        <p>${note.archived}</p>
+        <button id = deleteButton class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
+        <button class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Keluarkan</button>
+      </div>
+      </div>
+    `
+    })
+  }
 
-  Utils.emptyElement(notearchivedListElement);
-  notearchivedListElement.append(...archivedItemElements);
-};
+  
+  // const archivedItemElements = notearchived.map((notearchived) => {
+  //   const archivedItemElement = document.createElement("archive-items");
+  //   archivedItemElement.note = notearchived;
+  //   archivedItemElement.addEventListener(
+  //     "unarchiveNote",
+  //     onUnarchiveNoteHandler,
+  //   );
+
+  //   return archivedItemElements;
+  //});
+
+  // Utils.emptyElement(notearchivedListElement);
+  // notearchivedListElement.append(...archivedItemElements);
+//};
 
 const showNoteList = () => {
   Array.from(noteContainListElements.children).forEach((element) => {
@@ -204,8 +231,11 @@ const showQueryWaiting = () => {
 
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector("input-form").shadowRoot.querySelector('#FormSearch').addEventListener("submit", AddNoteHandler);
-  //document.querySelector("notes-item").shadowRoot.querySelector('#deleteButton').addEventListener("button",_addDeleteButton);
+  //document.querySelector("index").shadowRoot.querySelector('#ArchivedList').addEventListener("click",  _addArchivedButton());
+  //document.getElementById("#deleteButton").addEventListener('click',onDeleteNoteHandler);
+
 })
+
 
 showQueryWaiting();
 showNoteArchived();
