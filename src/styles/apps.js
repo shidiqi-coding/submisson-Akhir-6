@@ -193,14 +193,14 @@ class notesAPI {
         }
       })
 
-      .then((responseJSON) => {
-        if (responseJSON.data.length > 0) {
+      //.then((responseJSON) => {
+        if ((responseJSON) {
           return Promise.resolve(responseJSON.data);
-        } else {
-          return Promise.reject(new Error(`Note is not found`));
-        }
+        // } else {
+        //   return Promise.reject(new Error(`Note is not found`));
+        // }
       });
-  }
+  //}
 
   // request melakukan arsip note
   static archiveNote(noteID) {
