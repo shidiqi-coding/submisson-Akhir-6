@@ -138,7 +138,7 @@ class notesAPI {
 
   // }
   //=======================================================================================//
-  static createNote(note) {
+ static createNote(note) {
     return fetch(`${baseUrl}/notes`, {
       method: "POST",
       headers: {
@@ -194,8 +194,8 @@ class notesAPI {
       })
 
       .then((responseJSON) => {
-        if (responseJSON.length > 0) {
-          return Promise.resolve(responseJSON);
+        if (responseJSON.data.length > 0) {
+          return Promise.resolve(responseJSON.data);
         } else {
           return Promise.reject(new Error(`Note is not found`));
         }
@@ -236,15 +236,18 @@ class notesAPI {
           );
         }
       })
-      .then((responseJSON) => {
-        if (responseJSON.data.length > 0) {
+      //.then((responseJSON) => {
+        .then((responseJSON) => {
+          return Promise.resolve(responseJSON.data);
+      });
+        /*if (responseJSON.data.length > 0) {
           return Promise.resolve(responseJSON.data);
         } else {
           return Promise.reject(
             new Error("Catatan yang terArsipkan tidak tersedia")
           );
-        }
-      });
+        }*/
+      //});
   }
 
   //Request melakukan membatalkan Arsip
@@ -264,7 +267,6 @@ class notesAPI {
 }
 
 export default notesAPI;
-
 /*let notesData = [];
 
 async function createNoteApi(title, body) {
