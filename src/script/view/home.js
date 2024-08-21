@@ -1,4 +1,4 @@
-import notesAPI from "../../styles/apps.js";
+mport notesAPI from "../../styles/apps.js";
 import Utils from "../utils.js";
 
 
@@ -63,11 +63,12 @@ export const showNote = (query) => {
 
 export const showNoteArchived= () => {
   showLoading();
+  
   notesAPI
     .getArchived()
     .then((results) => {
       displayNotearchivedResult(results);
-      showNotearchivedList();
+     // showNotearchivedList();
     })
     .catch((error) => {
       console.error(
@@ -129,12 +130,7 @@ const onUnarchiveNoteHandler = (event) => {
 
 const displayResults = (notes) => {
 
-//   document.querySelectorAll('.arc-btn').forEach((button) => {
-//     button.addEventListener('click', () => {
-//         const noteId = button.getAttribute('id');
-//         notesAPI.archiveNote(noteId);
-//   })
-// })
+
   notes.map((note) => {
     
     
@@ -145,12 +141,27 @@ const displayResults = (notes) => {
         <p>${note.body}</p>
         <p>${note.createdAt}</p>
         <p>${note.archived}</p>
-        <button class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
+        <button id = "${note.id}"class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
         <button  id ="${note.id}"class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Arsipkan</button>
       </div>
       </div>
     `
     })
+
+
+    document.querySelectorAll('.arc-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+          const noteId = button.getAttribute('id');
+          notesAPI.archiveNote(noteId);
+    })
+  })
+
+  document.querySelectorAll('.del-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+        const noteId = button.getAttribute('id');
+        notesAPI.deleteNote(noteId);
+  })
+})
   }
 
  
@@ -171,19 +182,63 @@ const displayNotearchivedResult = (notearchived) => {
 
   notearchived.map((note)=>{
     noteArchivedListContainerElement.innerHTML += `
-     <div class ="card">
-      <div id=${note.id} class ="column-list">
+     <div class ="archived-card">
+      <div id=${note.id} class ="archived-column-list">
         <h2>${note.title}</h2>
         <p>${note.body}</p>
         <p>${note.createdAt}</p>
         <p>${note.archived}</p>
-        <button id = deleteButton class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
-        <button class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Keluarkan</button>
+        <button id = "${note.id}" class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
+        <button id = "${note.id}"class = "unarc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Keluarkan</button>
       </div>
       </div>
     `
     })
+
+    document.querySelectorAll('.unarc-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+          const noteId = button.getAttribute('id');
+          const userConfirmed = confirm("Apakah Anda yakin ingin mengeluarkan catatan ini dari arsip?");
+          if (userConfirmed) {
+              notesAPI.unArchiveNotes(noteId).then(() => {
+                  document.getElementById(noteId).remove(); // Menghapus elemen dari DOM
+              });
+          }
+      });
+  });
+  //tombol Hapus catatan 
+  
+  document.querySelectorAll('.del-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+        const noteId = button.getAttribute('id');
+        const userConfirmed = confirm("Apakah Anda yakin ingin menghapus catatan ini?");
+            if (userConfirmed) {
+                notesAPI.deleteNote(noteId).then(() => {
+                    document.getElementById(noteId).remove(); // Menghapus elemen dari DOM
+                });
+              }
+  })
+})
+        //notesAPI.deleteNote(noteId);
+    
+        
+        // const confirmation = confirm("Apakah anda ingin menghapus catatan ini");
+        // if(confirmation.ok){ 
+
+        //   notesAPI.deleteNote(noteId);
+
+        // } else{
+        //   document.getElementById(`${note.id}`).innerText = `Gagal Menghapus catatan`;
+        // }
+       
   }
+//})
+  
+   
+
+
+  
+  
 
   
   // const archivedItemElements = notearchived.map((notearchived) => {
@@ -208,12 +263,12 @@ const showNoteList = () => {
  // Utils.showElement(noteListElements);
 };
 
-const showNotearchivedList = () => {
-  Array.from(noteArchivedListContainerElement.children).forEach((element) => {
-    Utils.hideElement(element);
-  });
-  Utils.showElement(notearchivedListElement);
-};
+// const showNotearchivedList = () => {
+//   Array.from(noteArchivedListContainerElement.children).forEach((element) => {
+//     Utils.hideElement(element);
+//   });
+//   Utils.showElement(notearchivedListElement);
+// };
 
 const showLoading = () => {
   Array.from(noteContainListElements.children).forEach((element) => {
@@ -240,3 +295,4 @@ document.addEventListener('DOMContentLoaded', function () {
 showQueryWaiting();
 showNoteArchived();
 showNote();
+
