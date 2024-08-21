@@ -1,4 +1,4 @@
-mport notesAPI from "../../styles/apps.js";
+import notesAPI from "../../styles/apps.js";
 import Utils from "../utils.js";
 
 
