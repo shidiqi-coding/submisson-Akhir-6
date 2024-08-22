@@ -70,7 +70,7 @@ note-list{
  .card{
 
    
-    display: inline-grid;
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 50px;
     flex-wrap: wrap;
@@ -88,9 +88,11 @@ note-list{
 
    
     display: grid;
-    grid-template-columns: repeat(auto,1fr 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+    flex-wrap: wrap;
     padding: 10px;
+   
    
 
 } 
