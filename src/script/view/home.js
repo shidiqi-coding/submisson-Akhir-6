@@ -1,13 +1,15 @@
-mport notesAPI from "../../styles/apps.js";
+import notesAPI from "../../styles/apps.js";
 import Utils from "../utils.js";
-
+import Swal from 'sweetalert2';
+import AOS from 'aos';
 
 const noteContainListElements = document.querySelector("#containtList");
 const noteSearchingElement =
   noteContainListElements.querySelector(".searching");
 const noteLoadingElement =
   noteContainListElements.querySelector(".search-loading");
- const noteListElements = noteContainListElements.querySelector("#note-unarchive");
+const noteListElements =
+  noteContainListElements.querySelector("#note-unarchive");
 // const noteListElements = noteContainListElements.querySelector("note-list");
 
 const noteArchivedListContainerElement =
@@ -17,35 +19,32 @@ const noteArchivedListContainerElement =
 
 //handler buat tambah notes
 
-
-
 const AddNoteHandler = (event) => {
-  const title = document.querySelector("input-form").shadowRoot.querySelector("#title").value;
-  const body = document.querySelector("input-form").shadowRoot.querySelector("#message").value;
+  const title = document
+    .querySelector("input-form")
+    .shadowRoot.querySelector("#title").value;
+  const body = document
+    .querySelector("input-form")
+    .shadowRoot.querySelector("#message").value;
   const newNote = {
     title,
     body,
   };
 
-  
-
-
-
   notesAPI
-  .createNote(newNote)
-  .then((createdNote) => {
-    console.log("Catatan telah berhasil dibuat:", createdNote);
-    window.location.reload()
-  })
-  .catch((error) => {
-    console.error("Kesalahan saat membuat catatan:", error);
-  });
-
-  };
+    .createNote(newNote)
+    .then((createdNote) => {
+      console.log("Catatan telah berhasil dibuat:", createdNote);
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error("Kesalahan saat membuat catatan:", error);
+    });
+};
 document
   .querySelector("input-form")
   .addEventListener("submit ", AddNoteHandler);
-  
+
 //menampilkan data notes
 
 export const showNote = (query) => {
@@ -61,14 +60,14 @@ export const showNote = (query) => {
     });
 };
 
-export const showNoteArchived= () => {
+export const showNoteArchived = () => {
   showLoading();
-  
+
   notesAPI
     .getArchived()
     .then((results) => {
       displayNotearchivedResult(results);
-     // showNotearchivedList();
+      // showNotearchivedList();
     })
     .catch((error) => {
       console.error(
@@ -115,7 +114,7 @@ const onUnarchiveNoteHandler = (event) => {
     .unarchiveNote(noteID)
     .then(() => {
       const archivedItem = document.querySelector(
-        `archive-items[data-id ="${noteID}]"`,
+        `archive-items[data-id ="${noteID}]"`
       );
       if (archivedItem) {
         archivedItem.remove();
@@ -129,58 +128,103 @@ const onUnarchiveNoteHandler = (event) => {
 };
 
 const displayResults = (notes) => {
-
-
-  notes.map((note) => {
-    
-    
+  notes.forEach((note) => {
     noteListElements.innerHTML += `
-     <div class ="card">
-      <div id=${note.id} class ="column-list">
-        <h2>${note.title}</h2>
-        <p>${note.body}</p>
-        <p>${note.createdAt}</p>
-        <p>${note.archived}</p>
-        <button id = "${note.id}"class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
-        <button  id ="${note.id}"class = "arc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Arsipkan</button>
+      <div class="card">
+        <div id="${note.id}" class="column-list">
+          <h2>${note.title}</h2>
+          <p>${note.body}</p>
+          <p>${note.createdAt}</p>
+          <p>${note.archived}</p>
+          <button id="${note.id}" class="del-btn">
+            <i class="fa-solid fa-trash"></i> Hapus
+          </button>
+          <button id="${note.id}" class="arc-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Arsipkan
+          </button>
+        </div>
       </div>
-      </div>
-    `
-    })
+    `;
+  });
+  
+  //Menjalankan untuk mengarsipkan catatan
+  document.querySelectorAll(".arc-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noteId = button.getAttribute("id");
+      Swal.fire({
+        title: "Anda Yakin?",
+        text: "Untuk mengarsipkan catatan ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        iconColor:"#fdd005",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya",
+        cancelButtonText:"Tidak"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          notesAPI.archiveNote(noteId).then(() => {
+            button.parentElement.parentElement.remove();
+            Swal.fire({
+              title: "Berhasil",
+              text: "Catatan Berhasil diarsipkan.",
+              icon: "success"
+            });
+            showQueryWaiting();
+            showNoteArchived();
+            showNote();
+          });
+        }
+      });
+    });
+  });
+//};
 
+  //Menjalankan penghapusan catatan
+  document.querySelectorAll(".del-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noteId = button.getAttribute("id");
+      Swal.fire({
+        title: "Are you sure?",
+        //text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          notesAPI.deleteNote(noteId).then(() => {
+            button.parentElement.parentElement.remove();
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your note has been deleted.",
+              icon: "success"
+            });
+            showQueryWaiting();
+            showNoteArchived();
+            showNote();
+          });
+        }
+      });
+    });
+  });
+};
+// const noteListItemElements = notes.map((note) => {
+//   const ListItemElements = document.createElement("notes-item");
+//   ListItemElements.note = note;
+//   ListItemElements.addEventListener("deleteNotes", onDeleteNoteHandler);
 
-    document.querySelectorAll('.arc-btn').forEach((button) => {
-      button.addEventListener('click', () => {
-          const noteId = button.getAttribute('id');
-          notesAPI.archiveNote(noteId);
-    })
-  })
+//   return ListItemElements;
+//});
 
-  document.querySelectorAll('.del-btn').forEach((button) => {
-    button.addEventListener('click', () => {
-        const noteId = button.getAttribute('id');
-        notesAPI.deleteNote(noteId);
-  })
-})
-  }
-
- 
-  // const noteListItemElements = notes.map((note) => {
-  //   const ListItemElements = document.createElement("notes-item");
-  //   ListItemElements.note = note;
-  //   ListItemElements.addEventListener("deleteNotes", onDeleteNoteHandler);
-
-  //   return ListItemElements;
-  //});
-
-  // Utils.emptyElement(noteListElements);
-  // noteListElements.append(...noteListItemElements);
+// Utils.emptyElement(noteListElements);
+// noteListElements.append(...noteListItemElements);
 
 //};
 
 const displayNotearchivedResult = (notearchived) => {
-
-  notearchived.map((note)=>{
+  notearchived.map((note) => {
     noteArchivedListContainerElement.innerHTML += `
      <div class ="archived-card">
       <div id=${note.id} class ="archived-column-list">
@@ -188,79 +232,97 @@ const displayNotearchivedResult = (notearchived) => {
         <p>${note.body}</p>
         <p>${note.createdAt}</p>
         <p>${note.archived}</p>
-        <button id = "${note.id}" class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>
+        <!--<button id = "${note.id}" class = "del-btn"><i class="fa-solid fa-trash"></i>Hapus</button>-->
         <button id = "${note.id}"class = "unarc-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i>Keluarkan</button>
       </div>
       </div>
-    `
-    })
-
-    document.querySelectorAll('.unarc-btn').forEach((button) => {
-      button.addEventListener('click', () => {
-          const noteId = button.getAttribute('id');
-          const userConfirmed = confirm("Apakah Anda yakin ingin mengeluarkan catatan ini dari arsip?");
-          if (userConfirmed) {
-              notesAPI.unArchiveNotes(noteId).then(() => {
-                  document.getElementById(noteId).remove(); // Menghapus elemen dari DOM
-              });
-          }
-      });
+    `;
   });
-  //tombol Hapus catatan 
+
   
-  document.querySelectorAll('.del-btn').forEach((button) => {
-    button.addEventListener('click', () => {
-        const noteId = button.getAttribute('id');
-        const userConfirmed = confirm("Apakah Anda yakin ingin menghapus catatan ini?");
-            if (userConfirmed) {
-                notesAPI.deleteNote(noteId).then(() => {
-                    document.getElementById(noteId).remove(); // Menghapus elemen dari DOM
-                });
-              }
-  })
-})
-        //notesAPI.deleteNote(noteId);
-    
-        
-        // const confirmation = confirm("Apakah anda ingin menghapus catatan ini");
-        // if(confirmation.ok){ 
+  //Menjalankan untuk mengarsipkan catatan
+  document.querySelectorAll(".unarc-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noteId = button.getAttribute("id");
+      Swal.fire({
+        title: "Anda Yakin?",
+        text: "Untuk membatalkan pengarsipan catatan ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        iconColor:"#fdd005",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya",
+        cancelButtonText:"Tidak"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          notesAPI.unArchiveNotes(noteId).then(() => {
+            button.parentElement.parentElement.remove();
+            Swal.fire({
+              title: "Berhasil",
+              text: "Catatan Berhasil dikeluarkan.",
+              icon: "success"
+            });
+            showQueryWaiting();
+            showNoteArchived();
+            showNote();
+          });
+        }
+      });
+    });
+  });
+  //tombol Hapus catatan
 
-        //   notesAPI.deleteNote(noteId);
+  document.querySelectorAll(".del-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noteId = button.getAttribute("id");
+      const userConfirmed = confirm(
+        "Apakah Anda yakin ingin menghapus catatan ini?"
+      );
+      if (userConfirmed) {
+        notesAPI.deleteNote(noteId).then(() => {
+          //document.getElementById(noteId).remove(); // Menghapus elemen dari DOM
+          button.parentElement.parentElement.remove();
+          showQueryWaiting();
+          showNoteArchived();
+          showNote();
+        });
+      }
+    });
+  });
+  //notesAPI.deleteNote(noteId);
 
-        // } else{
-        //   document.getElementById(`${note.id}`).innerText = `Gagal Menghapus catatan`;
-        // }
-       
-  }
+  // const confirmation = confirm("Apakah anda ingin menghapus catatan ini");
+  // if(confirmation.ok){
+
+  //   notesAPI.deleteNote(noteId);
+
+  // } else{
+  //   document.getElementById(`${note.id}`).innerText = `Gagal Menghapus catatan`;
+  // }
+};
 //})
-  
-   
 
+// const archivedItemElements = notearchived.map((notearchived) => {
+//   const archivedItemElement = document.createElement("archive-items");
+//   archivedItemElement.note = notearchived;
+//   archivedItemElement.addEventListener(
+//     "unarchiveNote",
+//     onUnarchiveNoteHandler,
+//   );
 
-  
-  
+//   return archivedItemElements;
+//});
 
-  
-  // const archivedItemElements = notearchived.map((notearchived) => {
-  //   const archivedItemElement = document.createElement("archive-items");
-  //   archivedItemElement.note = notearchived;
-  //   archivedItemElement.addEventListener(
-  //     "unarchiveNote",
-  //     onUnarchiveNoteHandler,
-  //   );
-
-  //   return archivedItemElements;
-  //});
-
-  // Utils.emptyElement(notearchivedListElement);
-  // notearchivedListElement.append(...archivedItemElements);
+// Utils.emptyElement(notearchivedListElement);
+// notearchivedListElement.append(...archivedItemElements);
 //};
 
 const showNoteList = () => {
   Array.from(noteContainListElements.children).forEach((element) => {
     Utils.showElement(element);
   });
- // Utils.showElement(noteListElements);
+  // Utils.showElement(noteListElements);
 };
 
 // const showNotearchivedList = () => {
@@ -284,15 +346,15 @@ const showQueryWaiting = () => {
   Utils.showElement(noteSearchingElement);
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector("input-form").shadowRoot.querySelector('#FormSearch').addEventListener("submit", AddNoteHandler);
+document.addEventListener("DOMContentLoaded", function () {
+  document
+    .querySelector("input-form")
+    .shadowRoot.querySelector("#FormSearch")
+    .addEventListener("submit", AddNoteHandler);
   //document.querySelector("index").shadowRoot.querySelector('#ArchivedList').addEventListener("click",  _addArchivedButton());
   //document.getElementById("#deleteButton").addEventListener('click',onDeleteNoteHandler);
-
-})
-
+});
 
 showQueryWaiting();
 showNoteArchived();
 showNote();
-
